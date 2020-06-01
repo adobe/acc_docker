@@ -1,4 +1,4 @@
-# ORACLE DOCKERFILES PROJECT
+# ADOBE CAMPAIGN CLASSIC DOCKER PROJECT
 # --------------------------
 # This is the dockerfile for Adobe Campaign Classic (standalone version)
 # 
