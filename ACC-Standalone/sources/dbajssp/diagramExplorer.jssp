@@ -1,0 +1,610 @@
+<%@ page import="xtk:shared/nl.js"
+%><%@ page stringGroup="xtk:schemadoc"
+%><%
+  //NL.require('xtk:jsspcontext.js');
+
+/*******************************************************************
+ *  Displays the links between schemas o
+ *  Copyright Adobe 2019
+ *  Creation: Protat 2019/05/31
+ *******************************************************************/
+
+
+response.setContentType("application/json;charset=utf-8");
+
+//var res = xtk.session.Logon("", "", <param/>);
+//var newContext = logonWithUser("", "");
+
+//if( !(new NL.JSSPContext(request)).checkAuthentication(response) )
+//  return
+
+ // Get input parameters
+var strSchema = request.getParameter("schema");
+var strUser = request.getParameter("user");
+var strPassword = request.getParameter("password");
+var strAnalyze = request.getParameter("analyze"); // level of analyze (Table, Column, etc. ...
+var iSampling = request.getParameter("sampling"); // % of randomized for wkf exploration
+var sNoCache = request.getParameter("nocache"); // when this option is not set to true then checks on the server if a cache file is available for data distribution and display it instead of making new query
+
+// The Analyze mode requises authentication as it uses xtkQueryDef
+if (strAnalyze) {
+
+    var newContext = logonWithUser(strUser, strPassword);
+
+    //for(var i in application.operator){
+    //  document.write(i+': '+application.operator[i]+'\n');
+    //}
+}
+
+try
+{
+  var schema = strSchema ? application.getSchema(strSchema) : undefined;
+}
+catch( e )
+{
+  // discard error
+}
+
+
+var root = schema.root
+var sJsonBody = "";
+var sJsonHeader = "";
+var sJsonResult = "";
+var iCountLink = 0;
+
+var schema_namespace = strSchema.substr(0, strSchema.indexOf(":"));
+var schema_name = strSchema.substr(strSchema.indexOf(":")+1, strSchema.length);
+
+/*---------------------------------
+    CACHE FILE MANAGEMENT
+  ---------------------------------*/
+var sCacheFilenameFull = instanceVarDir + "/" + schema_namespace + "_" + schema_name + "_diagAnalyzerCache.json";
+var iCacheDuration = 3600; // Nb second until cache expires
+
+if(sNoCache != "true" && strAnalyze>0) {
+
+    var f = new File(sCacheFilenameFull);
+    //document.write(sCacheFilenameFull);
+    if (f.exists) {
+      //document.write (f.lastModified + "\n");
+
+      var dFiledate = new Date(f.lastModified);
+      iNbSeconds = (Date.now() - dFiledate) / 1000;
+
+      if (iNbSeconds < iCacheDuration) {
+          //document.write ("Serving the cache file" + "\n");
+          // We serve the cache instead of recomputing the data
+          var f = new File(sCacheFilenameFull);
+          f.open();
+
+          while (line = f.readln()) {
+              document.write (line + "\n");
+          }
+
+          f.close();
+          return false; // THEN WE STOP THE JSSP EXECUTION
+
+      } else {
+        //document.write ("cache too old" + "\n");
+      }
+
+    }
+} else {
+  //document.write ("no cache check");
+}
+
+//document.write ("Do we continue????");
+
+/*---------------------------------
+    SCHEMAS FIELDS(ATTRIBUTES)
+  ---------------------------------*/
+// Gloval variabale, the String Group
+var sg = sg_xtk_schemadoc;
+
+// Constructor, take an instance of JSSchema as parameter
+function WriteSQLSchema(schema)
+{
+  this.vectEnum = new Array();  // Array of Enumeration
+  this.vectTable = new Array(); // Array of (string * Array of SchemaNode)
+  this.schema = schema;
+  if( schema )
+    this.traverseSchema(schema);
+  this.sort();
+}
+
+// Helper function, returns the sorting function which sorts
+// on item[strItemName]. strItemName has to be a string
+WriteSQLSchema.prototype.sortItem = function()
+{
+  var args = arguments;
+  return function(a, b)
+  {
+    for( var i=0; i<args.length && !criteria; )
+    {
+      if( a[args[i]] && b[args[i]] )
+        var criteria = args[i];
+    }
+    if( !criteria )
+      return 0;
+    if (a[criteria] < b[criteria] )
+      return -1;
+    if (a[criteria] > b[criteria] )
+      return 1;
+    return 0;
+  }
+}
+
+// Traverses the schema
+// [in] the current node to analyze
+// [in] a vector being the current SQL Table
+WriteSQLSchema.prototype.traverseSchema = function(node, vectSqlField)
+{
+
+  var someEnum = function(a)
+  {
+    return a.name == node.enumeration.name;
+  }
+
+  if( node.enumeration && !this.vectEnum.some(someEnum) )
+    this.vectEnum.push(node.enumeration);
+
+  if( node.SQLName && vectSqlField )
+    vectSqlField.push(node);
+  if( node.SQLTable && !node.isLink )
+  {
+    var vector = new Array();
+    for each( var i in node.children )
+      this.traverseSchema(i, vector);
+    vector.sort(this.sortItem("SQLName"));
+    this.vectTable.push({name : node.SQLTable, value : vector});
+  }
+  else
+  {
+    for each( var i in node.children ) {
+      // We check that the child doesn't have the same nodePath as
+      // its parent to prevent invifinite recursion.
+      // Same nodePath on a child should not happend. There is maybe an issue
+      // in the schema documentation parser
+      if (i.nodePath !== node.nodePath) {
+        this.traverseSchema(i, vectSqlField);
+      }
+    }
+  }
+}
+
+// Sorts the tables and the enumerations according to their names
+WriteSQLSchema.prototype.sort = function()
+{
+  var enumSort = function(a, b)
+  {
+    var aName = a.name.substr(a.name.lastIndexOf(':') + 1);
+    var bName = b.name.substr(b.name.lastIndexOf(':') + 1)
+    if (aName < bName )
+      return -1;
+    if (aName > bName )
+      return 1;
+    return 0;
+  }
+  this.vectEnum.sort(enumSort);
+  this.vectTable.sort( this.sortItem("name") );
+}
+
+function analyzeUsageMetric(pSchema, pColumn, pContext, pDepth, pSampling){
+
+    //document.write("Analyze of " + pSchema + ' / ' + pColumn + ' / ' + pContext + '\n');
+
+    var iNbWorkflow = 0;
+    var iNbJS = 0;
+    var iNbJSSP = 0;
+    var iNbWebapp = 0;
+    var iNbSQL = 0;
+
+    if (pContext == "workflow" && pDepth>0) {
+
+        var iSampling = 0;
+
+        if (pSampling > 0) {
+          iSampling = pSampling;
+        } else {
+          iSampling = 70; // default value
+        }
+
+        // Add a random sampling to limit the analyze cost (to stay under 5 minutes overall execution of this JSSP
+        var iShouldIPass = Math.round(Math.random () * 99.9, 0);
+        var iRandomResult = Math.round(Math.random () * 100, 0);
+
+        //document.write ("iSampling: " + iSampling + " <> iShouldIPass: " + iShouldIPass + " <> iRandomResult: " + iRandomResult + '\n');
+
+        if (iShouldIPass > iSampling) {
+
+            if (iRandomResult < 50) {
+             // document.write("Random OK " + iShouldIPass + "//" + iRandomResult + "\n");
+              return 1;
+            } else {
+             // document.write("Random KO " + iShouldIPass + "//" + iRandomResult + "\n");
+              return 0;
+            }
+        } else {
+           // document.write("NO RANDOM - GO FOR QUERY: " + iShouldIPass + "\n");
+        }
+
+        var _xmlWKF =  <queryDef schema="xtk:workflow" operation="select">
+                        <select>
+                          <node expr="count(1)" alias="@count"/>
+                        </select>
+                        <where>
+                            <condition boolOperator="AND" expr={"@processDate >= DaysAgo(" + pDepth + ")"}/>
+                            <condition boolOperator="AND" expr={"data LIKE '%" + pSchema + "%'"}/>
+                        </where>
+                   </queryDef>;
+
+        if(pColumn || pColumn != "")
+        {
+            var condition = <condition boolOperator="AND" expr={"data LIKE '%" + pColumn + "%'"}/>
+            _xmlWKF.where.appendChild(condition);
+        }
+
+        //document.write(_xmlWKF.toXMLString());
+        var query = xtk.queryDef.create(_xmlWKF);
+
+        xmlQueryWorkflow = query.ExecuteQuery();
+
+        //document.write (xmlQueryWorkflow);
+
+        iNbWorkflow = xmlQueryWorkflow.workflow.@count;
+        return iNbWorkflow;
+
+    } else if (pContext == "js") {
+
+        var _xmlJS =  <queryDef schema="xtk:javascript" operation="select">
+                        <select>
+                          <node expr="@name" />
+                        </select>
+                        <orderBy displayOrder="count(name)" />
+                        <where>
+                          <condition expr={"@namespace NOT IN ('nms','xtk','nl')"}/>
+                          <condition expr={"data LIKE '%" + pSchema + "%'"}/>
+                        </where>
+                   </queryDef>;
+
+        if(pColumn || pColumn != "")
+         {
+            var condition = <condition expr={"data LIKE '%" + pColumn + "%'"}/>
+            _xmlJS.where.appendChild(condition);
+         }
+
+        var query = xtk.queryDef.create(_xmlJS);
+        xmlQueryJS = query.ExecuteQuery();
+
+        //document.write (xmlQueryJS.toXMLString());
+
+        String.prototype.count=function(s1) {
+            return (this.length - this.replace(new RegExp(s1,"g"), '').length) / s1.length;
+        }
+
+        iNbJS = xmlQueryJS.toString().count("<javascript _cs=");
+
+        //document.write (iNbJS + '\n')
+
+        return iNbJS;
+
+    } else if (pContext == "jssp") {
+
+        var _xmlJSSP =  <queryDef schema="xtk:jssp" operation="select">
+                        <select>
+                          <node expr="@name" />
+                        </select>
+                        <orderBy displayOrder="count(name)" />
+                        <where>
+                          <condition expr={"@namespace NOT IN ('nms','xtk','nl')"}/>
+                          <condition expr={"data LIKE '%" + pSchema + "%'"}/>
+                        </where>
+                   </queryDef>;
+
+        if(pColumn || pColumn != "")
+        {
+            var condition = <condition expr={"data LIKE '%" + pColumn + "%'"}/>
+            _xmlJSSP.where.appendChild(condition);
+        }
+
+        var query = xtk.queryDef.create(_xmlJSSP);
+        xmlQueryJSSP = query.ExecuteQuery();
+        //document.write (xmlQueryJSSP.toXMLString());
+
+        String.prototype.count=function(s1) {
+            return (this.length - this.replace(new RegExp(s1,"g"), '').length) / s1.length;
+        }
+
+        iNbJSSP = xmlQueryJSSP.toString().count("<jssp _cs=");
+        //document.write (iNbJSSP + '\n');
+        return iNbJSSP;
+
+    } else if (pContext == "webapp") {
+
+       var _xmlWebapp =  <queryDef schema="nms:webApp" operation="select">
+                        <select>
+                          <node expr="count(1)" alias="@count"/>
+                        </select>
+                        <where>
+                          <condition expr={"data LIKE '%" + pSchema + "%'"}/>
+                        </where>
+                   </queryDef>;
+
+        if(pColumn || pColumn != "")
+        {
+            var condition = <condition expr={"data LIKE '%" + pColumn + "%'"}/>
+            _xmlWebapp.where.appendChild(condition);
+        }
+
+        var query = xtk.queryDef.create(_xmlWebapp);
+        xmlQueryWebapp = query.ExecuteQuery();
+       // document.write (xmlQueryWebapp.toXMLString());
+
+        iNbWebApp = xmlQueryWebapp.webApp.@count;
+        //document.write (iNbWebapp + '\n');
+        return iNbWebApp;
+
+    } else if (pContext == "sql") {
+
+        var _xmlSQL =  <queryDef schema="xtk:sql" operation="select">
+                        <select>
+                          <node expr="@name" />
+                        </select>
+                        <orderBy displayOrder="count(name)" />
+                        <where>
+                          <condition expr={"@namespace NOT IN ('nms','xtk','nl')"}/>
+                          <condition expr={"data LIKE '%" + pSchema + "%'"}/>
+                        </where>
+                   </queryDef>;
+
+        if(pColumn || pColumn != "")
+        {
+            var condition = <condition expr={"data LIKE '%" + pColumn + "%'"}/>
+            _xmlSQL.where.appendChild(condition);
+        }
+
+        var query = xtk.queryDef.create(_xmlSQL);
+        xmlQuerySQL = query.ExecuteQuery();
+        //document.write (xmlQuerySQL.toXMLString());
+
+        String.prototype.count=function(s1) {
+            return (this.length - this.replace(new RegExp(s1,"g"), '').length) / s1.length;
+        }
+
+        iNbSQL = xmlQuerySQL.toString().count("<sql _cs=");
+        //max.write (iNbSQL + '\n');
+        return iNbSQL;
+
+    }
+
+    return false;
+}
+
+
+WriteSQLSchema.prototype.outputFields = function(fields)
+{
+
+  var iMaxOutput = 1000;
+  var sJsonFields = '';
+
+  // If sampling is not provided then it takes the default value
+  if (!iSampling || iSampling=="undefined") {
+    if (fields.length > 200 ) {
+        iSampling = 70; // force sampling to 70% for big tables
+    } else {
+        iSampling = 100; // Take all data for smaller tables
+    }
+  } else if (iSampling <70 ) {
+    iSampling = 70; // Minimum sampling value
+  } else if (iSampling >100 ) {
+    iSampling = 100; // Maximum sampling value
+  }
+
+  //document.write ("Sampling: " + iSampling);
+
+  for( var i=0; i<fields.length; i++ )
+  {
+
+    if(i >= iMaxOutput) break;
+
+
+    var row = fields[i];
+    sJsonFields = sJsonFields + '    { \n' ;
+    sJsonFields = sJsonFields + '      "fieldnum" : "' + (i+1) + '",\n';
+    sJsonFields = sJsonFields + '      "fieldInternalName" : "' + row.name + '",\n';
+    sJsonFields = sJsonFields + '      "fieldName" : "' + row.SQLName + '",\n';
+
+    sJsonFields = sJsonFields + '      "usageKPI" : [\n';
+    sJsonFields = sJsonFields + '       {\n';
+    sJsonFields = sJsonFields + '         "Attribute" : "' + row.name + '",\n';
+    sJsonFields = sJsonFields + '         "Workflows" : ' + ( strAnalyze>0 ? analyzeUsageMetric(strSchema, row.name , "workflow", strAnalyze, iSampling) : -1) + ',\n';
+    sJsonFields = sJsonFields + '         "JS" : ' + ( strAnalyze>0 ? analyzeUsageMetric(strSchema, row.name, "js") : -1) + ',\n';
+    sJsonFields = sJsonFields + '         "JSSP" : ' + ( strAnalyze>0 ? analyzeUsageMetric(strSchema, row.name, "jssp") : -1) + ',\n';
+    sJsonFields = sJsonFields + '         "Webapp" : ' + ( strAnalyze>0 ? analyzeUsageMetric(strSchema, row.name, "webapp") : -1) + ',\n';
+    sJsonFields = sJsonFields + '         "SQL" : ' + ( strAnalyze>0 ? analyzeUsageMetric(writeSchema.vectTable[0].name, row.SQLName, "sql") : -1) + '\n';
+
+    sJsonFields = sJsonFields + '       }\n';
+    sJsonFields = sJsonFields + '      ],\n';
+
+    if( row.type)
+    {
+       sJsonFields = sJsonFields + '      "fieldType" : "' + (row.size ? (row.type + ' (' + row.size) + ')"\n' : row.type + '"\n');
+    }
+    else
+    {
+       sJsonFields = sJsonFields + '     "fieldType" : "undefined"\n';
+    }
+
+
+    if (i < fields.length-1 && i < iMaxOutput-1)
+    {
+      sJsonFields = sJsonFields + '    },\n';
+    }
+    else
+    {
+      sJsonFields = sJsonFields + '    }\n';
+    }
+  }
+
+  return sJsonFields;
+}
+
+
+// The object used to output all the stuff
+var iCountAttributes = 0;
+
+
+var writeSchema = new WriteSQLSchema(schema);
+
+sJsonBody = sJsonBody + '  "attributes" : [\n';
+
+
+for( var i=0; i<writeSchema.vectTable.length; i++ )
+{
+  iCountAttributes++;
+  var table = writeSchema.vectTable[i];
+  sJsonBody = sJsonBody + writeSchema.outputFields(table.value);
+
+  if (i < writeSchema.vectTable.length-1)
+  {
+      sJsonBody = sJsonBody + ',';
+  }
+}
+
+sJsonBody = sJsonBody + '  ],\n';
+
+
+
+/*---------------------------------
+    SCHEMAS LINKS
+  ---------------------------------*/
+sJsonBody = sJsonBody + '  "links" : [\n';
+
+var iCountTotalLinks = 0;
+for each(var childNode in root.children)
+{
+  if (childNode.isLink)
+  {
+     iCountTotalLinks++;
+  }
+}
+
+var iMaxLinksToDisplay = 1000;
+
+for each (var childNode in root.children)
+{
+
+  if (childNode.isLink)
+  {
+
+     //document.write("***DEBUG*** : " + childNode.toSource() + "<br/>");
+
+     if(iCountLink >= iMaxLinksToDisplay) break;
+
+     iCountLink++;
+     sJsonBody = sJsonBody + '    { \n' ;
+     sJsonBody = sJsonBody + '      "link_num" : "' + iCountLink + '",\n';
+     sJsonBody = sJsonBody + '      "link_name" : "' + childNode.name + '",\n';
+     sJsonBody = sJsonBody + '      "link_target" : "' + childNode.target.schema.name + '",\n';
+     sJsonBody = sJsonBody + '      "link_target_namespace" : "' + childNode.target.schema.namespace + '",\n';
+     sJsonBody = sJsonBody + '      "link_external" : "' + childNode.isExternalJoin + '",\n';
+     sJsonBody = sJsonBody + '      "link_revintegrity" : "' + childNode.integrity + '",\n';
+     sJsonBody = sJsonBody + '      "link_unbound" : "' + childNode.isUnbound + '",\n';
+
+     if (childNode.reverseLink) {
+        sJsonBody = sJsonBody + '      "link_reverselink" : "' + childNode.reverseLink.name + '",\n';
+        sJsonBody = sJsonBody + '      "link_reverselink_unbound" : "' + childNode.reverseLink.isUnbound + '",\n';
+        sJsonBody = sJsonBody + '      "link_reverselink_external" : "' + childNode.reverseLink.isExternalJoin + '",\n';
+     }
+
+
+     var iCountJoinParts = 0;
+
+     sJsonBody = sJsonBody + '      "joinparts" : [\n';
+
+     var iCountTotalJoinParts = 0;
+     for each(var joinPart in childNode.joinParts)
+     {
+      iCountTotalJoinParts++;
+     }
+
+     for each(var joinPart in childNode.joinParts)
+     {
+
+        if (!joinPart.source){
+            // iCountTotalLinks--;
+            // continue;
+        }
+
+        //document.write("***DEBUG*** : " + joinPart.toSource() + "<br/>");
+
+        iCountJoinParts ++;
+        sJsonBody = sJsonBody + '         { \n' ;
+        sJsonBody = sJsonBody + '           "join_num" : "' + iCountJoinParts + '",\n';
+
+        if (joinPart.source) {
+          sJsonBody = sJsonBody + '           "source_name" : "' + joinPart.source["name"] + '",\n';
+        }
+
+        if (joinPart.destination) {
+          sJsonBody = sJsonBody + '           "destination_name" : "' + joinPart.destination["name"] + '"\n';
+        }
+
+        if (iCountJoinParts < iCountTotalJoinParts)
+        {
+          sJsonBody = sJsonBody + '         },\n';
+        }
+        else
+        {
+          sJsonBody = sJsonBody + '         }\n';
+        }
+    }
+
+    sJsonBody = sJsonBody + '      ]\n';
+
+
+    if (iCountLink < iCountTotalLinks && iCountLink < iMaxLinksToDisplay)
+    {
+      sJsonBody = sJsonBody + '    },\n';
+    }
+    else
+    {
+      sJsonBody = sJsonBody + '    }\n';
+    }
+
+  }
+}
+sJsonBody = sJsonBody + '  ]\n';
+sJsonBody = sJsonBody + '}\n';
+
+
+sJsonHeader = sJsonHeader + '{ \n' ;
+sJsonHeader = sJsonHeader + '  "schema_name" : "' + schema_name + '",\n';
+sJsonHeader = sJsonHeader + '  "table_name" : "' + writeSchema.vectTable[0].name + '",\n';
+sJsonHeader = sJsonHeader + '  "schema_namespace" : "' + schema_namespace + '",\n';
+sJsonHeader = sJsonHeader + '  "nbattributes" : "' + table.value.length + '",\n';
+
+sJsonHeader = sJsonHeader + '  "nblinks" : "' + iCountTotalLinks + '",\n';
+
+sJsonResult = sJsonHeader + sJsonBody;
+
+document.write(sJsonResult);
+
+/* ------------------------------------------------------------------
+     When deep analyze is done then save the result into the cache
+   ------------------------------------------------------------------ */
+if(strAnalyze>0) {
+    var f = new File(sCacheFilenameFull);
+
+    if (f.exists) {
+      f.remove();
+    }
+
+    var f = new File(sCacheFilenameFull);
+
+    f.open("w");
+    f.writeln(sJsonResult);
+    f.close();
+}
+
+%>

@@ -1,0 +1,141 @@
+<%
+
+/* **************************************************************************
+
+    diagram Explorer (ACX)
+    Version: 1.0
+    Created by: Christophe Protat 2019
+    Description :
+       - This JSSP return the a JSON structure with the list of Schemas that are
+       linked to a target Mapping
+       - This defines the list of root nodes to display from
+       the Diagram Explorer UI
+
+   ************************************************************************** */
+
+response.setContentType("application/json;charset=utf-8");
+
+var user = "";
+var password = "";
+var param = "";
+
+if (request.queryString) {
+  strParameters = request.queryString;
+  tab_strParameters = strParameters.split('&');
+
+  for each(parameter in tab_strParameters)
+  {
+
+    var tab_parameter = parameter.split('=');
+    var p_name = tab_parameter[0];
+    var p_value = tab_parameter[1];
+
+    if (p_name == "user")
+    {
+      user = p_value;
+    }
+    else if (p_name == "password")
+    {
+      password = p_value;
+    }
+    else
+    {
+      param += "&" + p_name + "=" + p_value;
+    }
+
+  }
+}
+
+var newContext = logonWithUser(user, password);
+
+/*
+for(var i in application.operator){
+  document.write(i+': '+application.operator[i]+'\n');
+}*/
+
+var query = NLWS.xtkQueryDef.create({
+  queryDef:
+    {
+      schema: "nms:deliveryMapping",
+      operation: "select",
+      distinct: "true",
+      select: {
+        node: [
+          { expr: "@targetSchema" },   // Name of link describing targeting dimension schema. If nothing specified, the associated expression in schema returns @schema.
+        ]
+      },
+      where: {
+      condition: [{expr: "@name != 'mapOperator'"},
+                  {expr: "@id != 0"}]
+      },
+      orderBy: {
+        node: {expr: "@targetSchema", sortDesc: "false"}
+      }
+    }
+});
+
+var results = query.ExecuteQuery();
+
+var mappings = results.getElements('deliveryMapping');
+var i;
+var dedupMappings = {};
+
+for (i = 0; i < mappings.length; i++) {
+  var m = mappings[i];
+
+  var targeting = m.$targetSchema;
+
+
+  if (!targeting.trim()) {
+    logWarning("No targeting dimension found for delivery mapping ");
+    continue;
+  }
+
+  var key = targeting;
+  if( dedupMappings[key] ) {
+    dedupMappings[key]++;
+  }
+  else {
+    dedupMappings[key] = 1;
+  }
+
+}
+
+var sJsonString = '';
+var key;
+var countKey = 0;
+var nbMaxKeys = Object.keys(dedupMappings).length;
+
+
+sJsonString = sJsonString + '{ \n' ;
+sJsonString = sJsonString + '    "schema_name":"Target Mappings",\n' ;
+sJsonString = sJsonString + '    "nbkeys":"' + nbMaxKeys + '",\n' ;
+sJsonString = sJsonString + '    "mappings" : [\n' ;
+
+for (key in dedupMappings) {
+  //Concat in a JSON response
+  countKey++;
+  sJsonString = sJsonString + '       { \n' ;
+  sJsonString = sJsonString + '         "fieldnum" : "' + countKey + '",\n';
+  sJsonString = sJsonString + '         "namespace" : "' + key.substr(0,key.indexOf(":")) + '",\n';
+  sJsonString = sJsonString + '         "schemaname" : "' + key.substr(key.indexOf(":")+1) + '"\n';
+
+
+  if (countKey < nbMaxKeys)
+  {
+    sJsonString = sJsonString + '       },\n';
+  }
+  else
+  {
+    sJsonString = sJsonString + '       }\n';
+  }
+
+}
+
+sJsonString = sJsonString + '    ]\n';
+sJsonString = sJsonString + '}\n';
+
+document.write (sJsonString  + '\n');
+
+
+%>
