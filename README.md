@@ -8,7 +8,7 @@ Docker Desktop is required.
 
 Client console should be installed on your computer. 
 
-To run this docker, simply include your Adobe Campaign sources on deb directory (debian9 *.deb only) and follow instructions below. 
+To run this docker, include your Adobe Campaign sources on "sources" directory (debian9 *.deb only) and follow instructions below. 
 
 ## How to get (build locally)?
 Clone `jordykovic/acc_docker` from here and build it yourself from the Dockerfile with the
