@@ -6,7 +6,7 @@ These images will require you to download any required [Adobe Campaign Classic](
  - nlserver6-v7-[BUILD]-amd64_deb9.deb
  - setup-client-7.0.[BUILD].exe
 
-     Download Adobe Campaign Classic from Support Portal
+Download Adobe Campaign Classic from Support Portal
      https://support.neolane.net/webApp/extranetLogin
 
 Clone or download this repository, include Adobe Campaign (debian9 version) and client console installers on `sources` directory and follow instructions below.
