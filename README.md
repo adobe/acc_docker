@@ -13,7 +13,7 @@ This configuration includes all components on the same computer:
 
 Overall communication between the processes is carried out according to the following schema:
 
-![sources](/images/standalone.png =650x)
+![sources](/images/standalone.png){ width=50% }
 
 ## Modules
 Installed modules are: 
