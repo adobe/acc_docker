@@ -15,8 +15,8 @@ Overall communication between the processes is carried out according to the foll
 
 <img src="/images/standalone.png" width="600">
 
-## Modules
-Installed modules are: 
+## Campaign packages
+Installed packages are: 
 - Delivery
 - CRM connectors
 - Marketing campaigns (Campaign)
