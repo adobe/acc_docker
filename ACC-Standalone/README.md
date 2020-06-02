@@ -18,7 +18,7 @@ Build your docker image locally:
 ./build.sh 
 docker build -t acc_standalone .
 ```
-Use this script to launch the docker container
+Use this script to launch the docker container:
 ```sh
 ./start.sh 
 docker run -d -p 80:80 -p 8080:8080 -it --name=acc_standalone acc_standalone:latest
