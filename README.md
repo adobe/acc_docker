@@ -1,58 +1,72 @@
-# acc_docker
-Adobe Campaign Classic Docker Standalone
+# Docker Image for Adobe Campaign Classic
+----------------------------------
+This repository contains Dockerfiles and sample to build your own Docker images for Adobe Campaign Classic.
 
-## Prerequisites
-Adobe Campaign Classic is not included. 
+## Required files
+----------------------------------
+These images will require you to download any required [Adobe Campaign Classic](https://www.adobe.com/marketing/campaign.html) commercial software before installation.
+    (1) nlserver6-v7-[BUILD]-amd64_deb9.deb
+    (2) setup-client-7.0.[BUILD].exe
 
-Docker Desktop is required.
+     Download Adobe Campaign Classic from Support Portal
+     https://support.neolane.net/webApp/extranetLogin
 
-Client console should be installed on your computer. 
+Include Adobe Campaign (debian9 version) and client console installers on `sources` directory and follow instructions below.
 
-To run this docker, include your Adobe Campaign sources on "sources" directory (debian9 *.deb only) and follow instructions below. 
-
-## How to get (build locally)?
-Clone `jordykovic/acc_docker` from here and build it yourself from the Dockerfile with the
-following command executed:
-
-
-	./build.sh (docker build -t acc_standalone .)
-
-Use this command to launch the docker container
-
-	./start.sh (docker run -d -p 80:80 -p 8080:8080 -it --name=acc_standalone acc_standalone:latest)
+# How to get?
+----------------------------------
+Clone this repository and build it your docker image locally: 
+```sh
+./build.sh 
+docker build -t acc_standalone .
+```
+Use this script to launch the docker container
+```sh
+./start.sh 
+docker run -d -p 80:80 -p 8080:8080 -it --name=acc_standalone acc_standalone:latest
+```
 
 Connect to:
+```sh
+http://localhost:8080 (Client console)
+- Login: admin
+- Password: neo
+```
+or
+```sh
+http://localhost:8080/view/home (Web view)
+- Login: admin
+- Password: neo
+```
 
-	http://localhost:8080 (Client console)
-	Login: admin - neo
-	or
-	http://localhost:8080/view/home (Web)
-	Login: admin - neo
-	
-To stop the docker container
-
-	./stop.sh (docker stop acc_standalone)
-
+To stop the docker container, you can use this script:
+```sh
+./stop.sh (docker stop acc_standalone)
+```
 To enter into Docker image as root:
-	
-	./ssh.sh (docker exec -it acc_standalone /bin/bash)
-
+```sh	
+./ssh.sh (docker exec -it acc_standalone /bin/bash)
+```
 If you are using Windows environment, first run the script:
-
-        ./setWindowsFormat.bat
-
+```sh
+./setWindowsFormat.bat
+```
 Environement variables:
-	
-	PostgreSQL Database Name: PG_DB_NAME_VAR =  neolane_db
-	PostgreSQL User Name: PG_USER_VAR = neolane_user 
-	PostgreSQL User Password: PG_PASSWORD_VAR =  neolane_pwd 
-	
-	Campaign Admin Name: CAMPAIGN_ADMIN_USER_VAR =  neo
-	Campaign Admin Password: CAMPAIGN_ADMIN_PASSWORD_VAR = neo 
-	Campaign Internal Password: CAMPAIGN_INTERNAL_PASSWORD_VAR = neo
+| Variable | Default |
+| -------- | ------- |
+| INSTANCE | acc |
+| CAMPAIGN_ADMIN_PASSWORD_VAR | neo |
+| CAMPAIGN_INTERNAL_PASSWORD_VAR | neo |
+| PG_DB_NAME_VAR | neolane_db |
+| PG_USER_VAR | neolane_user |
+| PG_PASSWORD_VAR | neolane_pwd |
 
-Plugins:
-Database Analyzer: A powerful tool to explore and understand your datamodel
-	- URL: http://localhost:8080/nl/dbanalyser/index.html?baseurl=http%3A%2F%2Flocalhost:8080&columnsdepth=10&preset=custom&loglevel=0&maxtoload=10&analyzedepth=30&nocache=false#
 
-Enjoy, and feel free to improve it! 
+# Plugins:
+----------------------------------
+## Database Analyzer: 
+A powerful tool to explore and understand your datamodel
+
+- URL: [DB Analyzer](http://localhost:8080/nl/dbanalyser/index.html?baseurl=http%3A%2F%2Flocalhost:8080&columnsdepth=10&preset=custom&loglevel=0&maxtoload=10&analyzedepth=30&nocache=false#) (once docker started)
+
+**Enjoy, and feel free to improve it!**

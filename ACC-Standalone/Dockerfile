@@ -33,7 +33,6 @@ ENV PG_PASSWORD_VAR neolane_pwd
 # Environment variables required for Campaign 
 # -------------------------------------------
 ENV INSTANCE acc
-ENV CAMPAIGN_ADMIN_USER_VAR neo
 ENV CAMPAIGN_ADMIN_PASSWORD_VAR neo 
 ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo 
 ENV LANG C.UTF-8
