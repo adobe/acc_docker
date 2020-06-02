@@ -9,8 +9,8 @@ These images will require you to download any required [Adobe Campaign Classic](
 Download Adobe Campaign Classic from Support Portal:
      https://support.neolane.net/webApp/extranetLogin
 
-Clone or download this repository, include Adobe Campaign (debian9 version) and client console installers on `sources` directory and follow instructions below.
-![Screen](/images/sources.png)
+Clone or download this repository, include Adobe Campaign (debian9 version) and client console installers on `sources` directory, then follow instructions below.
+![sources](/images/sources.png)
 
 ## How to
 Build your docker image locally: 
