@@ -12,6 +12,7 @@ This configuration includes all components on the same computer:
 - statistics process (stat).
 
 Overall communication between the processes is carried out according to the following schema:
+
 ![sources](/images/standalone.png)
 
 ## Modules
