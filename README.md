@@ -12,6 +12,7 @@ This configuration includes all components on the same computer:
 - statistics process (stat).
 
 Overall communication between the processes is carried out according to the following schema:
+
 ![sources](/images/standalone.png)
 
 ## Modules
@@ -44,8 +45,5 @@ Installed modules are:
 
 To activate/deactivate default modules, enter into 'ACC_standalone/acc_install.sh' and edit package list (line 56)
 
-## How to? 
+## How to get this docker? 
 Go to 'acc_standalone' directory and follow README instructions
-
-# Adobe Campaign Classic Distributed architecture
-Soon...
