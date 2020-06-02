@@ -1,6 +1,13 @@
 # Docker Image for Adobe Campaign Classic
 This repository contains Dockerfiles and sample to build your own Docker images for Adobe Campaign Classic.
 
+## Required files
+This image will require you to download any required [Adobe Campaign Classic](https://www.adobe.com/marketing/campaign.html) commercial software before installation.
+ - nlserver6-v7-[BUILD]-amd64_deb9.deb
+ - setup-client-7.0.[BUILD].exe
+
+Download Adobe Campaign Classic from [Support Portal](https://support.neolane.net/webApp/extranetLogin)
+
 # Adobe Campaign Classic Standalone
 ## Architecture
 This configuration includes all components on the same computer:
