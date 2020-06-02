@@ -12,7 +12,7 @@ Download Adobe Campaign Classic from Support Portal:
 Clone or download this repository, include Adobe Campaign (debian9 version) and client console installers on `sources` directory and follow instructions below.
 
 ## How to
-Build it your docker image locally: 
+Build your docker image locally: 
 ```sh
 ./build.sh 
 docker build -t acc_standalone .
