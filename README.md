@@ -20,7 +20,7 @@ This configuration includes all components on the same computer:
 
 Overall communication between the processes is carried out according to the following schema:
 
-<img src="/images/standalone.png" width="600">
+<img src="https://github.com/adobe/acc_docker/images/standalone.png" width="600">
 
 ## Campaign packages
 Installed packages are: 
