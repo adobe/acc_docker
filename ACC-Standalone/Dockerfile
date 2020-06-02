@@ -66,9 +66,9 @@ RUN service postgresql start &&\
 	psql $PG_DB_NAME_VAR -c "create extension pgcrypto;" &&\
     service postgresql stop
 
-# Snowflake ODBC driver installation (optional for FDA)
+# Snowflake FDA (add snowflake ODBC driver in 'sources' directory first)
 # -----------------------------------------------------
-RUN dpkg -i /sources/snowflake*.deb
+# RUN dpkg -i /sources/snowflake*.deb
 
 # Campaign installation & configuration
 # -------------------------------------
