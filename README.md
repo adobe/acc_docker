@@ -6,7 +6,7 @@ This image will need you to download any required [Adobe Campaign Classic](https
  - nlserver6-v7-[BUILD]-amd64_deb9.deb
  - setup-client-7.0.[BUILD].exe
 
-Download Adobe Campaign Classic from [Support Portal](https://support.neolane.net/webApp/extranetLogin)
+Download Adobe Campaign Classic from [Adobe Software Portal](https://experience.adobe.com/#/downloads/content/software-distribution/en/campaign.html)
 
 # Adobe Campaign Classic Standalone
 ## Architecture
