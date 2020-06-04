@@ -10,7 +10,7 @@ Download Adobe Campaign Classic from [Adobe Software Portal](https://experience.
 
 Clone or download this repository, include Adobe Campaign (debian9 version) and client console installers on `sources` directory
 
-![sources](/images/sources.png)
+![sources](https://github.com/adobe/acc_docker/blob/master/images/sources.png)
 
 Then follow instructions below:
 
