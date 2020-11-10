@@ -32,7 +32,7 @@ ENV PG_PASSWORD_VAR neolane_pwd
 
 # Environment variables required for Campaign 
 # -------------------------------------------
-ENV INSTANCE acc
+ENV INSTANCE acc1
 ENV CAMPAIGN_ADMIN_PASSWORD_VAR neo 
 ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo 
 ENV LANG C.UTF-8
@@ -42,9 +42,14 @@ ENV LC_ALL C.UTF-8
 # ----------------------
 RUN apt-get update \
  	&& apt-get upgrade -y  \
-	&& apt-get install -y unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql \
+	&& apt-get install -y unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales\
 	&& apt-get clean all \
 	&& rm -rf /var/lib/apt/lists/* 
+
+#Locales
+# ----------------------
+RUN sed -i 's/# en_US ISO-8859-1/en_US ISO-8859-1/' /etc/locale.gen && sed -i 's/# en_US.ISO-8859-15 ISO-8859-15/en_US.ISO-8859-15 ISO-8859-15/' /etc/locale.gen && sed -i 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
+
 
 # Campaign installer and configuration scripts
 # --------------------------------------------
@@ -68,7 +73,7 @@ RUN service postgresql start &&\
 
 # Snowflake FDA (add snowflake ODBC driver in 'sources' directory first)
 # -----------------------------------------------------
-# RUN dpkg -i /sources/snowflake*.deb
+#RUN dpkg -i /sources/snowflake*.deb
 
 # Campaign installation & configuration
 # -------------------------------------
