@@ -41,8 +41,6 @@ ENV PG_PASSWORD_VAR neolane_pwd
 ENV INSTANCE acc1
 ENV CAMPAIGN_ADMIN_PASSWORD_VAR neo 
 ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo 
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
 
 # Debian 9 prerequisites 
 # ----------------------
