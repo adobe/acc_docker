@@ -51,7 +51,7 @@ Check if instance is running (from your favorite navigator):
 	Password: Your password (default is neo)
 	
 ## How to connect from client console?
->If you're using Mac or Linux as Docker server and a VM for Windows Client console, you need to replace [localhost] by your server IP 
+>If you're using Mac or Linux as Docker server and a VM for Windows Client console, you need to replace [localhost] by your Docker server IP 
 
 Connect to instance:
 
