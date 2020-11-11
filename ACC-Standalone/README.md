@@ -48,7 +48,7 @@ Check if instance is running (from your favorite navigator):
 
 	http://localhost:8080/view/supervision
 	Login: admin  
-	Password: neo
+	Password: Your password (default is neo)
 	
 ## How to connect from client console?
 >If you're using Mac or Linux as Docker server and a VM for Windows Client console, you need to replace [localhost] by your server IP 
@@ -57,7 +57,7 @@ Connect to instance:
 
 	http://localhost:8080
 	Login: admin
-	Password: neo
+	Password: Your password (default is neo)
 
 ## How to stop and remove Docker? 
 To stop the docker container, you can use this script:
@@ -90,6 +90,6 @@ If you are using Windows environment, first run the script:
 ## Additional tool - Data model Analyzer:
 - URL: http://localhost:8080/nl/dbanalyser/index.html?baseurl=http%3A%2F%2Flocalhost:8080&columnsdepth=10&preset=custom&loglevel=0&maxtoload=10&analyzedepth=30&nocache=false#
     - Login: admin
-    - Password: Your password
+    - Password: Your password (default is neo)
 
 **Enjoy, and feel free to improve it!**

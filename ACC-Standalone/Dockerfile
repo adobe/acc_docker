@@ -24,6 +24,12 @@ FROM debian:stretch
 # ----------
 MAINTAINER jordy@adobe.com
 
+
+# Build to install 
+# ---------------------------------------------
+ENV BUILD *.deb
+
+
 # Environment variables required for PostgreSQL 
 # ---------------------------------------------
 ENV PG_DB_NAME_VAR neolane_db
@@ -73,7 +79,7 @@ RUN service postgresql start &&\
 
 # Snowflake FDA (add snowflake ODBC driver in 'sources' directory first)
 # -----------------------------------------------------
-#RUN dpkg -i /sources/snowflake*.deb
+RUN dpkg -i /sources/odbc/snowflake*.deb
 
 # Campaign installation & configuration
 # -------------------------------------
