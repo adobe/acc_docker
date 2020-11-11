@@ -1,6 +1,21 @@
 # Docker Image for Adobe Campaign Classic Standalone
 This repository contains Dockerfiles and sample to build your own Docker images for Adobe Campaign Classic.
 
+
+## Prerequisites
+Before using this docker, here is couple of things you need to check: 
+- A first view on Docker is better
+    - Minimum to know: https://docs.docker.com/get-started/
+    - More concepts: https://docker-curriculum.com/ 
+- Docker CE is installed and ready on your laptop:
+    -  Windows: https://docs.docker.com/docker-for-windows/install/
+    - Mac: https://docs.docker.com/docker-for-mac/install/
+- Port 80 and 8080 are not already used
+    - Windows helper: https://rb.gy/srhpvs
+    - Mac tool: https://rb.gy/p9ee9n
+- And finally, you need Campaign Classic basics ! 
+    - https://docs.adobe.com/content/help/en/campaign-classic-learn/tutorials/getting-started/introduction-to-adobe-campaign-classic.html
+
 ## Required files
 These images will need you to download any required [Adobe Campaign Classic](https://www.adobe.com/marketing/campaign.html) commercial software before installation.
  - nlserver6-v7-[BUILD]-amd64_deb9.deb
@@ -14,47 +29,56 @@ Clone or download this repository, include Adobe Campaign (debian9 version) and 
 
 Then follow instructions below:
 
-## How to?
-Build your docker image locally: 
+## How to get?
+Clone `adobe/acc_docker` from GitHub, extract files and build it:
+
 ```sh
 ./build.sh 
 docker build -t acc_standalone .
 ```
-Use this script to launch the docker container:
+## How to start?
+Use this command to launch containers
 ```sh
 ./start.sh 
 docker run -d -p 80:80 -p 8080:8080 -it --name=acc_standalone acc_standalone:latest
 ```
 
-Connect to:
-```sh
-http://localhost:8080 (Client console)
-- Login: admin
-- Password: neo
-```
-or
-```sh
-http://localhost:8080/view/home (Web view)
-- Login: admin
-- Password: neo
-```
+## How to test?
+Check if instance is running (from your favorite navigator):
 
+	http://localhost:8080/view/supervision
+	Login: admin  
+	Password: neo
+	
+## How to connect from client console?
+>If you're using Mac or Linux as Docker server and a VM for Windows Client console, you need to replace [localhost] by your server IP 
+
+Connect to instance:
+
+	http://localhost:8080
+	Login: admin
+	Password: neo
+
+## How to stop and remove Docker? 
 To stop the docker container, you can use this script:
 ```sh
 ./stop.sh (docker stop acc_standalone)
 ```
+## How to connect to ssh?
 To enter into Docker image as root:
 ```sh	
 ./ssh.sh (docker exec -it acc_standalone /bin/bash)
 ```
+## How to run Docker on Windows?
 If you are using Windows environment, first run the script:
 ```sh
 ./setWindowsFormat.bat
 ```
-Environement variables:
+## Environment variables:
+
 | Variable | Default |
 | -------- | ------- |
-| BUILD | nlserver.deb |
+| BUILD | *.deb |
 | INSTANCE | acc1 |
 | CAMPAIGN_ADMIN_PASSWORD_VAR | neo |
 | CAMPAIGN_INTERNAL_PASSWORD_VAR | neo |
@@ -63,10 +87,9 @@ Environement variables:
 | PG_PASSWORD_VAR | neolane_pwd |
 
 
-# Plugins:
-## Database Analyzer: 
-A powerful tool to explore and understand your datamodel
-
-- URL: [DB Analyzer](http://localhost:8080/nl/dbanalyser/index.html?baseurl=http%3A%2F%2Flocalhost:8080&columnsdepth=10&preset=custom&loglevel=0&maxtoload=10&analyzedepth=30&nocache=false#) (once docker started)
+## Additional tool - Data model Analyzer:
+- URL: http://localhost:8080/nl/dbanalyser/index.html?baseurl=http%3A%2F%2Flocalhost:8080&columnsdepth=10&preset=custom&loglevel=0&maxtoload=10&analyzedepth=30&nocache=false#
+    - Login: admin
+    - Password: Your password
 
 **Enjoy, and feel free to improve it!**
