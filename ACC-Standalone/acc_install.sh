@@ -10,7 +10,7 @@
 
 # Camapign installation
 # ---------------------
-dpkg -i /sources/nlserver*.deb 
+dpkg -i /sources/$BUILD 
 
 # Path settings
 # ---------------------

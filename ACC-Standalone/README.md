@@ -54,7 +54,8 @@ If you are using Windows environment, first run the script:
 Environement variables:
 | Variable | Default |
 | -------- | ------- |
-| INSTANCE | acc |
+| BUILD | nlserver.deb |
+| INSTANCE | acc1 |
 | CAMPAIGN_ADMIN_PASSWORD_VAR | neo |
 | CAMPAIGN_INTERNAL_PASSWORD_VAR | neo |
 | PG_DB_NAME_VAR | neolane_db |
