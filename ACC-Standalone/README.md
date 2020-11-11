@@ -30,7 +30,7 @@ Clone or download this repository, include Adobe Campaign (debian9 version) and 
 Then follow instructions below:
 
 ## How to get?
-Clone `adobe/acc_docker` from GitHub, extract files and build it:
+Clone `adobe/acc_docker` from GitHub, go to 'ACC-Standalone/' and build it:
 
 ```sh
 ./build.sh 
