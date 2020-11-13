@@ -69,6 +69,12 @@ To enter into Docker image as root:
 ```sh	
 ./ssh.sh (docker exec -it acc_standalone /bin/bash)
 ```
+## How to monitor PostgreSQL?
+Enter into Docker image as root:
+```sh	
+./ssh.sh (docker exec -it acc_standalone /bin/bash)
+watch -n1 bash monitor.sh
+```
 ## How to run Docker on Windows?
 If you are using Windows environment, first run the script:
 ```sh
