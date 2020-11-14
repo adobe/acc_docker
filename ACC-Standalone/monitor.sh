@@ -1,7 +1,7 @@
 #!/bin/bash
 export LC_ALL='C'
 export LANGUAGE='C'
-DATABASE='postgres'
+DATABASE='neolane_db'
 
 # uncomment if PSQL fails to connect
 # eval $(/usr/sbin/camp-db-params -e)
