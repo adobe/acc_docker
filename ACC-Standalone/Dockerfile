@@ -57,7 +57,7 @@ RUN sed -i 's/# en_US ISO-8859-1/en_US ISO-8859-1/' /etc/locale.gen && sed -i 's
 
 # Campaign installer and configuration scripts
 # --------------------------------------------
-COPY acc_install.sh apache.sh acc_start.sh setup_instance.js /
+COPY acc_install.sh apache.sh monitor.sh acc_start.sh setup_instance.js /
 COPY sources /sources
 RUN chmod a+x /*.sh &&\
 	chmod a+x /*.js
