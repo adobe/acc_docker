@@ -29,7 +29,6 @@ MAINTAINER jordy@adobe.com
 # ---------------------------------------------
 ENV BUILD *.deb
 
-
 # Environment variables required for PostgreSQL 
 # ---------------------------------------------
 ENV PG_DB_NAME_VAR neolane_db
@@ -81,10 +80,10 @@ RUN dpkg -i /sources/odbc/snowflake*.deb
 
 # Campaign installation & configuration
 # -------------------------------------
+RUN dpkg -i /sources/$BUILD 
 RUN /acc_install.sh 
 
 RUN service postgresql start &&\
-	/etc/init.d/nlserver6 start &&\
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/neolane/nl6/lib &&\
 	export PATH=$PATH:/usr/local/neolane/nl6/bin &&\
 	export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/:$LD_LIBRARY_PATH &&\
@@ -102,7 +101,7 @@ COPY /sources/dbajssp /usr/local/neolane/nl6/datakit/xtk/eng/jssp/
 
 # Client console availability
 # ---------------------------
-COPY /sources/setup-client-*.exe /usr/local/neolane/nl6/datakit/nl/eng/jsp/
+COPY /sources/setup-*.exe /usr/local/neolane/nl6/datakit/nl/eng/jsp/
 
 # Default neolane user rights
 # ---------------------------

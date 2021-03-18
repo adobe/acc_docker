@@ -8,10 +8,6 @@
 #    - Create standalone Campaign instance
 #    - Configure Campaign instance 
 
-# Camapign installation
-# ---------------------
-dpkg -i /sources/$BUILD 
-
 # Path settings
 # ---------------------
 sed -i '$a\\' /root/.bashrc
@@ -29,9 +25,14 @@ export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/:$LD_LIBR
 # ---------------------
 /etc/init.d/postgresql start
 
-# Start Campaign
-# ---------------------
-/etc/init.d/nlserver6 start
+# Create instance $INSTANCE
+# ----------------------------
+nlserver config -internalpassword:/$CAMPAIGN_INTERNAL_PASSWORD_VAR
+nlserver config -addinstance:$INSTANCE/*/eng
+
+nlserver config -instance:$INSTANCE -createdb -cnx:[postgresql:$PG_USER_VAR:$PG_DB_NAME_VAR/$PG_PASSWORD_VAR@localhost:5432,timezone=America/New_York,unicodeData=true,usetimestamptz=true,NChar=true,unicodeData=1] \
+		 -internalpwd:$CAMPAIGN_INTERNAL_PASSWORD_VAR \
+		 -packages:[nms:core,nms:campaign,nms:amp,nms:mrm,nms:interaction,nms:social,nms:messageCenterControl,nms:paper,nms:mobile,nms:phone,nms:mobileApp,ncm:content,nms:survey,nms:neolap,nms:response,nms:federatedDataAccess,nms:campaignOptimization,nms:purl,nms:deliverability,nms:coupon,nms:centralLocal,crm:connectors,nms:webAnalytics,nms:aemIntegration,nms:aamIntegration]
 
 # Configure ServerConf.xml
 # ------------------------
@@ -45,16 +46,6 @@ sed -i 's/xMailer="nlserver, Build $(PRODUCT_VERSION)"/xMailer="Adobe Campaign I
 # Configure config-default.xml
 # ----------------------------
 sed -i 's/trackinglogd autoStart="'false'"/trackinglogd autoStart="'true'"'/g /usr/local/neolane/nl6/conf/config-default.xml
-
-
-# Create instance $INSTANCE
-# ----------------------------
-nlserver config -internalpassword:/$CAMPAIGN_INTERNAL_PASSWORD_VAR
-nlserver config -addinstance:$INSTANCE/*/eng
-
-nlserver config -instance:$INSTANCE -createdb -cnx:[postgresql:$PG_USER_VAR:$PG_DB_NAME_VAR/$PG_PASSWORD_VAR@localhost:5432,timezone=America/New_York,unicodeData=true,usetimestamptz=true,NChar=true,unicodeData=1] \
-		 -internalpwd:$CAMPAIGN_INTERNAL_PASSWORD_VAR \
-		 -packages:[nms:core,nms:campaign,nms:amp,nms:mrm,nms:interaction,nms:social,nms:messageCenterControl,nms:paper,nms:mobile,nms:phone,nms:mobileApp,ncm:content,nms:survey,nms:neolap,nms:response,nms:federatedDataAccess,nms:campaignOptimization,nms:purl,nms:deliverability,nms:coupon,nms:centralLocal,crm:connectors,nms:webAnalytics,nms:aemIntegration,nms:aamIntegration]
 
 # Configure instance (config-$INSTANCE.xml)
 # -----------------------------------------
@@ -73,10 +64,6 @@ cd /usr/local/
 chown -R neolane:neolane neolane
 chmod -R 775 neolane
 chmod 755 neolane
-
-# Stop Campaign
-# ----------------------------
-/etc/init.d/nlserver6 stop
 
 # Stop PostgreSQL
 # ----------------------------
