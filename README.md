@@ -1,5 +1,5 @@
 # Docker Image for Adobe Campaign Classic
-This repository contains Dockerfiles and sample to build your own Docker images for Adobe Campaign Classic.
+Purpose of this project is to allow Adobe Campaign developpers to work without requiring any infrastructure skills to install and configure Campaign. This repository contains Dockerfiles and sample scripts to build your own Docker images for Adobe Campaign Classic.
 
 ## Required files
 This image will need you to download any required [Adobe Campaign Classic](https://www.adobe.com/marketing/campaign.html) commercial software before installation.
