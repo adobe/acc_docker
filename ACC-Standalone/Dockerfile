@@ -45,7 +45,7 @@ ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo
 # ----------------------
 RUN apt-get update \
  	&& apt-get upgrade -y  \
-	&& apt-get install -y unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales\
+	&& apt-get install -y unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales openssl\
 	&& apt-get clean all \
 	&& rm -rf /var/lib/apt/lists/* 
 
@@ -90,8 +90,16 @@ RUN service postgresql start &&\
 	su neolane -c "/usr/local/neolane/nl6/bin/nlserver javascript -instance:$INSTANCE -file setup_instance.js" &&\
     service postgresql stop
 
-# Apache configuration (port 80)
-# --------------------
+# Apache configuration (port 80 and 443)
+# --------------------------------------
+RUN mkdir /etc/apache2/certificate && \
+    cd /etc/apache2/certificate && \
+    openssl genrsa -des3 -passout pass:password -out server.pass.key 2048 && \
+    openssl rsa -passin pass:password -in server.pass.key -out server.key && \
+    rm server.pass.key && \
+    openssl req -new -key server.key -out server.csr -subj "/C=IN/ST=UP/L=Noida/O=Adobe/OU=Campaign/CN=$INSTANCE" && \
+    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
 RUN /apache.sh 
 
 # DB Analyser plugin (optional)
@@ -113,6 +121,7 @@ RUN cd /usr/local/ &&\
 # Docker internal network ports
 # -----------------------------
 EXPOSE 80
+EXPOSE 443
 EXPOSE 8080
 EXPOSE 22 
 
