@@ -20,7 +20,6 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/neolane/nl6/lib
 export PATH=$PATH:/usr/local/neolane/nl6/bin
 export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/:$LD_LIBRARY_PATH
 
-
 # Start PostgreSQL
 # ---------------------
 /etc/init.d/postgresql start

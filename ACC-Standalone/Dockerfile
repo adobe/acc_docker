@@ -45,8 +45,8 @@ ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo
 # ----------------------
 RUN apt-get update \
  	&& apt-get upgrade -y  \
-	&& apt-get install -y unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales openssl\
-	&& apt-get clean all \
+	&& apt-get install -y apt-utils systemd-container unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales openssl\
+  && apt-get clean all \
 	&& rm -rf /var/lib/apt/lists/* 
 
 #Locales
@@ -74,10 +74,6 @@ RUN service postgresql start &&\
 	psql $PG_DB_NAME_VAR -c "create extension pgcrypto;" &&\
     service postgresql stop
 
-# Snowflake FDA (add snowflake ODBC driver in 'sources' directory first)
-# -----------------------------------------------------
-RUN dpkg -i /sources/odbc/snowflake*.deb
-
 # Campaign installation & configuration
 # -------------------------------------
 RUN dpkg -i /sources/$BUILD 
@@ -101,6 +97,15 @@ RUN mkdir /etc/apache2/certificate && \
     openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
 RUN /apache.sh 
+
+# Snowflake FDA
+# -----------------------------------------------------
+RUN /usr/local/neolane/nl6/bin/fda-setup-scripts/snowflake_odbc-setup.sh
+
+# Google Big Query FDA 
+# -----------------------------------------------------
+RUN /usr/local/neolane/nl6/bin/fda-setup-scripts/bigquery_odbc-setup.sh
+#RUN /usr/local/neolane/nl6/bin/fda-setup-scripts/bigquery_sdk-setup.sh
 
 # DB Analyser plugin (optional)
 # -----------------------------
