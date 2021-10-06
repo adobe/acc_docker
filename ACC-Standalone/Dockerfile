@@ -88,13 +88,13 @@ RUN service postgresql start &&\
 
 # Apache configuration (port 80 and 443)
 # --------------------------------------
-RUN mkdir /etc/apache2/certificate && \
-    cd /etc/apache2/certificate && \
-    openssl genrsa -des3 -passout pass:password -out server.pass.key 2048 && \
-    openssl rsa -passin pass:password -in server.pass.key -out server.key && \
-    rm server.pass.key && \
-    openssl req -new -key server.key -out server.csr -subj "/C=IN/ST=UP/L=Noida/O=Adobe/OU=Campaign/CN=$INSTANCE" && \
-    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+#RUN mkdir /etc/apache2/certificate && \
+#    cd /etc/apache2/certificate && \
+#    openssl genrsa -des3 -passout pass:password -out server.pass.key 2048 && \
+#    openssl rsa -passin pass:password -in server.pass.key -out server.key && \
+#    rm server.pass.key && \
+#    openssl req -new -key server.key -out server.csr -subj "/C=IN/ST=UP/L=Noida/O=Adobe/OU=Campaign/CN=$INSTANCE" && \
+#    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
 RUN /apache.sh 
 

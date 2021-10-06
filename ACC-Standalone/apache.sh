@@ -5,8 +5,18 @@
 # Description: 
 #    - Configure Apache / Campaign integration 
 
+#Auto-Signed certificate (to use HTTPS)
+mkdir /etc/apache2/certificate && \
+cd /etc/apache2/certificate && \
+openssl genrsa -des3 -passout pass:password -out server.pass.key 2048 && \
+openssl rsa -passin pass:password -in server.pass.key -out server.key && \
+rm server.pass.key && \
+openssl req -new -key server.key -out server.csr -subj "/C=EU/ST=FR/L=Paris/O=Campaign/OU=Classic/CN=$INSTANCE" && \
+openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+
+#Apache configuration
 a2dismod -f auth_basic authn_file authz_user autoindex cgi dir env negotiation userdir &&\
-a2enmod  alias authz_host mime ssl rewrite&&\
+a2enmod  alias authz_host mime ssl rewrite &&\
 touch /etc/apache2/mods-available/nlsrv.load &&\
 echo "LoadModule requesthandler24_module /usr/local/neolane/nl6/lib/libnlsrvmod.so" >> /etc/apache2/mods-available/nlsrv.load &&\
 ln -s /usr/local/neolane/nl6/tomcat-7/conf/apache_neolane.conf /etc/apache2/mods-available/nlsrv.conf &&\
