@@ -18,7 +18,7 @@
 #
 # Pull base image
 # ---------------
-FROM debian:stretch
+FROM debian:buster
 
 # Maintainer
 # ----------
@@ -45,7 +45,7 @@ ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo
 # ----------------------
 RUN apt-get update \
  	&& apt-get upgrade -y  \
-	&& apt-get install -y apt-utils systemd-container unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales openssl\
+	&& apt-get install -y apt-utils systemd-container unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu63 libprotobuf17 libcurl4 libpcre16-3 libc-ares2 openjdk-11-jdk phantomjs postgresql-client postgresql locales openssl \
   && apt-get clean all \
 	&& rm -rf /var/lib/apt/lists/* 
 
@@ -63,8 +63,8 @@ RUN chmod a+x /*.sh &&\
 
 # PostgreSQL configuration
 # ------------------------
-RUN sed -i -e "s/^[# ]*\\(listen_addresses[ ]*=[ ]*'\\)[^']*\\('.*\\)$/\\1*\\2/" /etc/postgresql/9.6/main/postgresql.conf &&\
-	sed -i 's/peer/trust/g' /etc/postgresql/9.6/main/pg_hba.conf
+RUN sed -i -e "s/^[# ]*\\(listen_addresses[ ]*=[ ]*'\\)[^']*\\('.*\\)$/\\1*\\2/" /etc/postgresql/11/main/postgresql.conf &&\
+	sed -i 's/peer/trust/g' /etc/postgresql/11/main/pg_hba.conf
 
 RUN service postgresql start &&\
 	su postgres -c "createuser -d -r -s root" &&\
@@ -82,7 +82,7 @@ RUN /acc_install.sh
 RUN service postgresql start &&\
 	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/neolane/nl6/lib &&\
 	export PATH=$PATH:/usr/local/neolane/nl6/bin &&\
-	export LD_LIBRARY_PATH=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/amd64/:$LD_LIBRARY_PATH &&\
+	export LD_LIBRARY_PATH=/usr/lib/jvm/java-11-openjdk-amd64/jre/lib/amd64/:$LD_LIBRARY_PATH &&\
 	su neolane -c "/usr/local/neolane/nl6/bin/nlserver javascript -instance:$INSTANCE -file setup_instance.js" &&\
     service postgresql stop
 
@@ -92,6 +92,7 @@ RUN /apache.sh
 
 # Snowflake FDA
 # -----------------------------------------------------
+RUN touch /etc/odbcinst.ini
 RUN /usr/local/neolane/nl6/bin/fda-setup-scripts/snowflake_odbc-setup.sh
 
 # Google Big Query FDA 
