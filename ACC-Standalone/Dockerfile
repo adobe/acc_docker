@@ -45,8 +45,8 @@ ENV CAMPAIGN_INTERNAL_PASSWORD_VAR neo
 # ----------------------
 RUN apt-get update \
  	&& apt-get upgrade -y  \
-	&& apt-get install -y apt-utils systemd-container unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales openssl\
-  && apt-get clean all \
+	&& apt-get install -y apt-utils systemd-container unixodbc mlocate curl vim wget apache2 telnet elinks openssh-server bc libicu57 libprotobuf10 libcurl3 libc-ares2 openjdk-8-jdk phantomjs postgresql-client postgresql locales openssl \
+    && apt-get clean all \
 	&& rm -rf /var/lib/apt/lists/* 
 
 #Locales

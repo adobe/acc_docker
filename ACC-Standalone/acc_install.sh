@@ -31,7 +31,7 @@ nlserver config -addinstance:$INSTANCE/*/eng
 
 nlserver config -instance:$INSTANCE -createdb -cnx:[postgresql:$PG_USER_VAR:$PG_DB_NAME_VAR/$PG_PASSWORD_VAR@localhost:5432,timezone=America/New_York,unicodeData=true,usetimestamptz=true,NChar=true,unicodeData=1] \
 		 -internalpwd:$CAMPAIGN_INTERNAL_PASSWORD_VAR \
-		 -packages:[nms:core,nms:campaign,nms:amp,nms:mrm,nms:interaction,nms:social,nms:messageCenterControl,nms:paper,nms:mobile,nms:phone,nms:mobileApp,ncm:content,nms:survey,nms:neolap,nms:response,nms:federatedDataAccess,nms:campaignOptimization,nms:purl,nms:deliverability,nms:coupon,nms:centralLocal,crm:connectors,nms:webAnalytics,nms:aemIntegration,nms:aamIntegration]
+		 -packages:[nms:core,nms:campaign,nms:amp,nms:mrm,nms:interaction,nms:social,nms:messageCenterControl,nms:paper,nms:mobile,nms:phone,nms:mobileApp,ncm:content,nms:survey,nms:neolap,nms:response,nms:federatedDataAccess,nms:campaignOptimization,nms:purl,nms:coupon,nms:centralLocal,crm:connectors,nms:webAnalytics,nms:aemIntegration,nms:aamIntegration]
 
 # Configure ServerConf.xml
 # ------------------------
